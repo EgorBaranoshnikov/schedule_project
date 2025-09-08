@@ -57,7 +57,8 @@ int schedule_data_3v(vector<vector<pair<string, int>>> &data_v1, vector<pair<pai
         {
             if (data_v1[j][i].first == data_v4[q].first.first)
             {
-                kol_slosh += data_v4[q].first.second.second;
+                kol_slosh += data_v4[q].first.second.second * data_v1[j][i].second;
+                break;
             }
         }
     }
@@ -73,7 +74,8 @@ vector<vector<vector<string>>> post_all_lessons(vector<vector<pair<string, int>>
     {
         schedule_data_v1 = schedule_data_1v(stoi(data_v2[i][2]), data_v1[i]);
         schedule_data_v2 = schedule_data_2v(data_v1[i], stoi(data_v2[i][2]));
-        schedule_data_v3 = schedule_data_3v(data_v1, data_v4, i, stoi(data_v2[i][2])); 
+        schedule_data_v3 = schedule_data_3v(data_v1, data_v4, i, stoi(data_v2[i][2]));
+        
     }
 }
 
