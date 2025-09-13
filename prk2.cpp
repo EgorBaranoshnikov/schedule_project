@@ -22,7 +22,7 @@ int evaluate_schedule() // оценить_расписание
     return 0;
 }
 
-vector<vector<int>> schedule_data_1v(int kol_day, vector<pair<string, int>> data_v1) // количество уроков за каждый предмет
+vector<vector<int>> schedule_data_1v(int kol_day, vector<pair<string, int>> &data_v1) // количество уроков в день за каждый предмет
 {
     vector<vector<int>> schedule_data_1v(data_v1.size());
     for (int i = 0; i < data_v1.size(); i++)
@@ -37,19 +37,22 @@ vector<vector<int>> schedule_data_1v(int kol_day, vector<pair<string, int>> data
     return schedule_data_1v;
 }
 
-int schedule_data_2v(vector<pair<string, int>> &data_v1_kol_yr, int kol_day) // среднее количество уроков
+pair<int, int> schedule_data_2v(vector<pair<string, int>> &data_v1_kol_yr, int kol_day) // среднее количество уроков
 {
+    pair<int, int> a;
     int kol_yr = 0;
     for (int i = 0; i < data_v1_kol_yr.size(); i++)
     {
         kol_yr += data_v1_kol_yr[i].second;
     }
-    int sr_kol_yr = kol_yr / kol_day;
-    return sr_kol_yr;
+    a.first = kol_yr / kol_day;
+    a.second = kol_yr % kol_day;
+    return a;
 }
 
-int schedule_data_3v(vector<vector<pair<string, int>>> &data_v1, vector<pair<pair<string, pair<int, int>>, vector<string>>> &data_v4, int j, int dop) // средний бал сложности дня
+pair<int, int> schedule_data_3v(vector<vector<pair<string, int>>> &data_v1, vector<pair<pair<string, pair<int, int>>, vector<string>>> &data_v4, int j, int dop) // средний бал сложности дня
 {
+    pair<int, int> a;
     int kol_slosh = 0;
     for (int i = 0; i < data_v1[j].size(); i++)
     {
@@ -62,20 +65,73 @@ int schedule_data_3v(vector<vector<pair<string, int>>> &data_v1, vector<pair<pai
             }
         }
     }
-    return kol_slosh / dop;
+    a.first = kol_slosh / dop;
+    a.second = kol_slosh & dop;
+    return a;
+}
+
+vector<vector<string>> schedule_v1(vector<vector<int>> &schedule_data_v1, pair<int, int> &schedule_data_v2, pair<int, int> &schedule_data_v3, int kol_day, vector<vector<pair<string, int>>> &data_v1)
+{
+    vector<vector<string>> schedule_1v(kol_day);
+    vector<vector<int>> fine(kol_day);
+    for (int i = 0; i < schedule_data_v1.size(); i++)
+    {
+        int fine1 = 0, fine2 = 0;
+        int qday;
+        for (int j = 0; j < kol_day; j++)
+        {
+            int d1 = kol_day - schedule_data_v2.second, d2 = schedule_data_v2.second, f1 = kol_day - schedule_data_v3.second, f2 = schedule_data_v3.second;
+            fine[j] = vector<int>(3, 1000);
+            for (int q = 0; q < schedule_data_v1[i].size(); q++)
+            {
+                if (schedule_data_v2.first + 1 < schedule_1v[schedule_data_v1[i][q] - 1].size() && d2 == 0)
+                {
+                    fine1 += 4 * (schedule_1v[schedule_data_v1[i][q] - 1].size() - schedule_data_v2.first + 1);
+                    d2--;
+                }
+                else if (schedule_data_v2.first < schedule_1v[schedule_data_v1[i][q] - 1].size() && d1 == 0)
+                {
+                    fine1 += 4 * (schedule_1v[schedule_data_v1[i][q] - 1].size() - schedule_data_v2.first);
+                    d1--;
+                }
+                else if (schedule_data_v2.first + 1 == schedule_1v[schedule_data_v1[i][q] - 1].size())
+                    d2--;
+                else if (schedule_data_v2.first == schedule_1v[schedule_data_v1[i][q] - 1].size())
+                    d1--;
+            }
+            if (fine1 + fine2 < fine[j][0] + fine[j][1])
+            {
+                fine[j][0]+= fine1;
+                fine[j][1]+= fine2;
+                qday = j;
+            }
+            for (int q = 0; q < schedule_data_v1[i].size(); q++)
+            {
+                if (schedule_data_v1[i][q] == kol_day)
+                    schedule_data_v1[i][q] = 1;
+                else
+                    schedule_data_v1[i][q]++;
+            }
+        }
+        for (int j = 0; j < schedule_data_v1[i].size(); j++)
+        {
+            schedule_1v[(schedule_data_v1[i][j] % kol_day) - 1].push_back(data_v1[i][j].first);
+        }
+    }
 }
 
 vector<vector<vector<string>>> post_all_lessons(vector<vector<pair<string, int>>> &data_v1, vector<vector<string>> &data_v2, vector<vector<vector<string>>> &data_v3, vector<pair<pair<string, pair<int, int>>, vector<string>>> &data_v4, int &classs) // разместить все уроки 1 версия
 {
     vector<vector<vector<string>>> schedule(classs);
     vector<vector<int>> schedule_data_v1;
-    int schedule_data_v2, schedule_data_v3;
+    pair<int, int> schedule_data_v2, schedule_data_v3;
+    vector<vector<string>> schedule_1v;
     for (int i = 0; i < classs; i++)
     {
         schedule_data_v1 = schedule_data_1v(stoi(data_v2[i][2]), data_v1[i]);
         schedule_data_v2 = schedule_data_2v(data_v1[i], stoi(data_v2[i][2]));
         schedule_data_v3 = schedule_data_3v(data_v1, data_v4, i, stoi(data_v2[i][2]));
-        
+        schedule[i] = schedule_v1(schedule_data_v1, schedule_data_v2, schedule_data_v3, stoi(data_v2[i][2]), data_v1);
     }
 }
 
