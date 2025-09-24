@@ -70,52 +70,71 @@ pair<int, int> schedule_data_3v(vector<vector<pair<string, int>>> &data_v1, vect
     return a;
 }
 
-vector<vector<string>> schedule_v1(vector<vector<int>> &schedule_data_v1, pair<int, int> &schedule_data_v2, pair<int, int> &schedule_data_v3, int kol_day, vector<vector<pair<string, int>>> &data_v1)
+int fine11(vector<int> &a, int b, vector<vector<string>> schedule_1v, int i) // 1. Штраф за превышение количества уроков
+{
+    int fine1 = 0;
+    for (int q = 0; q < a.size(); q++)
+    {
+        if (schedule_1v[a[q] - 1].size() + 1 > b)
+        {
+            fine1 += 3 * schedule_1v[a[q] - 1].size();
+        }
+    }
+    return fine1;
+}
+
+int fine22(vector<int> &a, int b, vector<int> f) // 2. Штраф за превышение балла сложности
+{
+    int fine2 = 0;
+    for (int q = 0; q < a.size(); q++)
+    {
+        if (f[a[q]] > b)
+        {
+            fine2 += 3;
+        }
+    }
+    return fine2;
+}
+
+vector<vector<string>> schedule_v1(vector<vector<int>> &schedule_data_v1, pair<int, int> &schedule_data_v2, pair<int, int> &schedule_data_v3, int kol_day, vector<pair<string, int>> data_v1)
 {
     vector<vector<string>> schedule_1v(kol_day);
-    vector<vector<int>> fine(kol_day);
+    vector<int> f(kol_day, 0);
+    // 1) находим самое оптимальное расстановку уроков в неделе
     for (int i = 0; i < schedule_data_v1.size(); i++)
     {
-        int fine1 = 0, fine2 = 0;
-        int qday;
+        // 2) перебераем каждый день что бы найти лучший
+        int good_day;
+        int day_fine = INT_MAX;
         for (int j = 0; j < kol_day; j++)
         {
-            int d1 = kol_day - schedule_data_v2.second, d2 = schedule_data_v2.second, f1 = kol_day - schedule_data_v3.second, f2 = schedule_data_v3.second;
-            fine[j] = vector<int>(3, 1000);
-            for (int q = 0; q < schedule_data_v1[i].size(); q++)
+            int fine1 = 0, fine2 = 0;
+            fine1 = fine11(schedule_data_v1[i], schedule_data_v2.first, schedule_1v, i);
+            fine2 = fine22(schedule_data_v1[i], schedule_data_v3.first, f);
+            // 3. Штраф за много уроков одного типа
+            // 4. лучший день + следующий день
+            if (fine1 + fine2 < day_fine)
             {
-                if (schedule_data_v2.first + 1 < schedule_1v[schedule_data_v1[i][q] - 1].size() && d2 == 0)
-                {
-                    fine1 += 4 * (schedule_1v[schedule_data_v1[i][q] - 1].size() - schedule_data_v2.first + 1);
-                    d2--;
-                }
-                else if (schedule_data_v2.first < schedule_1v[schedule_data_v1[i][q] - 1].size() && d1 == 0)
-                {
-                    fine1 += 4 * (schedule_1v[schedule_data_v1[i][q] - 1].size() - schedule_data_v2.first);
-                    d1--;
-                }
-                else if (schedule_data_v2.first + 1 == schedule_1v[schedule_data_v1[i][q] - 1].size())
-                    d2--;
-                else if (schedule_data_v2.first == schedule_1v[schedule_data_v1[i][q] - 1].size())
-                    d1--;
-            }
-            if (fine1 + fine2 < fine[j][0] + fine[j][1])
-            {
-                fine[j][0]+= fine1;
-                fine[j][1]+= fine2;
-                qday = j;
+                good_day = j;
+                day_fine = fine1 + fine2;
             }
             for (int q = 0; q < schedule_data_v1[i].size(); q++)
             {
-                if (schedule_data_v1[i][q] == kol_day)
+                schedule_data_v1[i][q]++;
+                if (schedule_data_v1[i][q] == kol_day + 1)
                     schedule_data_v1[i][q] = 1;
-                else
-                    schedule_data_v1[i][q]++;
             }
         }
+        // проверяем + ставим
         for (int j = 0; j < schedule_data_v1[i].size(); j++)
         {
-            schedule_1v[(schedule_data_v1[i][j] % kol_day) - 1].push_back(data_v1[i][j].first);
+            if (((schedule_data_v1[i][j] + good_day) % kol_day) - 1 == -1)
+            {
+                schedule_1v[kol_day - 1].push_back(data_v1[i].first);
+            }
+            else
+                schedule_1v[((schedule_data_v1[i][j] + good_day) % kol_day) - 1].push_back(data_v1[i].first);
+            f[((schedule_data_v1[i][j] + good_day) % kol_day)] += data_v1[i].second;
         }
     }
 }
@@ -131,7 +150,7 @@ vector<vector<vector<string>>> post_all_lessons(vector<vector<pair<string, int>>
         schedule_data_v1 = schedule_data_1v(stoi(data_v2[i][2]), data_v1[i]);
         schedule_data_v2 = schedule_data_2v(data_v1[i], stoi(data_v2[i][2]));
         schedule_data_v3 = schedule_data_3v(data_v1, data_v4, i, stoi(data_v2[i][2]));
-        schedule[i] = schedule_v1(schedule_data_v1, schedule_data_v2, schedule_data_v3, stoi(data_v2[i][2]), data_v1);
+        schedule[i] = schedule_v1(schedule_data_v1, schedule_data_v2, schedule_data_v3, stoi(data_v2[i][2]), data_v1[i]);
     }
 }
 
