@@ -103,6 +103,7 @@ vector<vector<string>> schedule_v1(vector<vector<int>> &schedule_data_v1, pair<i
     // 1) находим самое оптимальное расстановку уроков в неделе
     for (int i = 0; i < schedule_data_v1.size(); i++)
     {
+
         // 2) перебераем каждый день что бы найти лучший
         int good_day;
         int day_fine = INT_MAX;
