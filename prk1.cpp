@@ -5,21 +5,127 @@
 #include <string>
 #include <fstream>
 #include <cmath>
+#include <map>
 using namespace std;
 
-int can_post_a_lesson() // можно ли разместить урок
+vector<string> get_teachers_for_subject(const string &subject, vector<pair<pair<string, pair<int, int>>, vector<string>>> &data_v4)
 {
-    return 0;
+    for (auto &x : data_v4)
+        if (x.first.first == subject)
+            return x.second;
+
+    return {};
 }
 
-int improve_schedule() // улучшить расписание
+bool try_swap_in_day(vector<string> &day, int pos, const string &teacher, int day_id, map<string, vector<vector<bool>>> &busy, vector<bool> &processed)
 {
-    return 0;
+    for (int i = 0; i < (int)day.size(); i++)
+    {
+        if (i == pos)
+            continue;
+        if (processed[i])
+            continue;
+        if (!busy[teacher][day_id][i])
+        {
+            swap(day[i], day[pos]);
+            return true;
+        }
+    }
+    return false;
 }
 
-int evaluate_schedule() // оценить_расписание
+vector<vector<vector<string>>> schedule_v2(vector<vector<vector<string>>> schedule, vector<vector<pair<string, int>>> &data_v1, vector<vector<string>> data_v2, int teacher_count, int &classs, vector<pair<pair<string, pair<int, int>>, vector<string>>> &data_v4)
 {
-    return 0;
+    int days = stoi(data_v2[0][2]);
+    int max_lessons = 15;
+    map<string, vector<vector<bool>>> teacher_busy;
+    for (int c = 0; c < classs; c++)
+        for (auto &sub : data_v1[c])
+        {
+            auto teachers = get_teachers_for_subject(sub.first, data_v4);
+            for (auto &t : teachers)
+                teacher_busy[t] = vector<vector<bool>>(days, vector<bool>(max_lessons, false));
+        }
+
+    vector<vector<vector<string>>> result = schedule;
+    for (int c = 0; c < classs; c++)
+    {
+        map<string, string> main_teacher;
+        for (int d = 0; d < days; d++)
+        {
+            vector<bool> processed(result[c][d].size(), false);
+            for (int l = 0; l < (int)result[c][d].size(); l++)
+            {
+                string subject = result[c][d][l];
+                if (!main_teacher.count(subject))
+                {
+                    auto teachers = get_teachers_for_subject(subject, data_v4);
+                    if (!teachers.empty())
+                        main_teacher[subject] = teachers[0];
+                }
+
+                string t;
+                if (main_teacher.count(subject))
+                    t = main_teacher[subject];
+
+                bool teacher_found = false;
+
+                if (!t.empty())
+                {
+                    // пробуем переставить уроки
+                    if (!teacher_busy[t][d][l])
+                    {
+                        teacher_found = true;
+                        teacher_busy[t][d][l] = true;
+                    }
+                    else
+                    {
+                        bool ok = try_swap_in_day(result[c][d], l, t, d, teacher_busy, processed);
+                        if (ok)
+                        {
+                            teacher_found = true;
+                            teacher_busy[t][d][l] = true;
+                            subject = result[c][d][l];
+                            if (!main_teacher.count(subject))
+                            {
+                                auto teachers = get_teachers_for_subject(subject, data_v4);
+                                if (!teachers.empty())
+                                    main_teacher[subject] = teachers[0];
+                            }
+                            t = main_teacher.count(subject) ? main_teacher[subject] : string();
+                        }
+                        else
+                        {
+                            // пробуем другого учителя
+                            auto teachers = get_teachers_for_subject(subject, data_v4);
+                            for (auto &alt : teachers)
+                            {
+                                if (!teacher_busy[alt][d][l])
+                                {
+                                    main_teacher[subject] = alt;
+                                    t = alt;
+                                    teacher_found = true;
+                                    teacher_busy[t][d][l] = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (teacher_found && !t.empty())
+                {
+                    result[c][d][l] = subject + " (" + t + ")";
+                }
+                else
+                {
+                    result[c][d][l] = subject + " ()";
+                }
+                processed[l] = true;
+            }
+        }
+    }
+
+    return result;
 }
 
 vector<vector<int>> schedule_data_1v(int kol_day, vector<pair<string, int>> &data_v1) // количество уроков в день за каждый предмет
@@ -66,7 +172,7 @@ pair<int, int> schedule_data_3v(vector<vector<pair<string, int>>> &data_v1, vect
         }
     }
     a.first = kol_slosh / dop;
-    a.second = kol_slosh & dop;
+    a.second = kol_slosh % dop;
     return a;
 }
 
@@ -105,7 +211,7 @@ vector<vector<string>> schedule_v1(vector<vector<int>> &schedule_data_v1, pair<i
     {
 
         // 2) перебераем каждый день что бы найти лучший
-        int good_day;
+        int good_day = 0;
         int day_fine = INT_MAX;
         for (int j = 0; j < kol_day; j++)
         {
@@ -138,11 +244,37 @@ vector<vector<string>> schedule_v1(vector<vector<int>> &schedule_data_v1, pair<i
             f[((schedule_data_v1[i][j] + good_day) % kol_day)] += data_v1[i].second;
         }
     }
+    return schedule_1v;
 }
 
-vector<vector<vector<string>>> post_all_lessons(vector<vector<pair<string, int>>> &data_v1, vector<vector<string>> &data_v2, vector<vector<vector<string>>> &data_v3, vector<pair<pair<string, pair<int, int>>, vector<string>>> &data_v4, int &classs) // разместить все уроки 1 версия
+void save_schedule_to_file(vector<vector<vector<string>>> pr_schedule, vector<vector<string>> &data_v2)
+{
+    ofstream file("final_schedule.txt");
+    for (int i = 0; i < pr_schedule.size(); i++)
+    {
+        file << "Класс: " << data_v2[i][0] << endl;
+        file << "Классный руководитель: " << data_v2[i][1] << endl;
+        file << "Дней в неделе: " << data_v2[i][2] << endl
+             << endl;
+
+        int days = stoi(data_v2[i][2]);
+        for (int j = 0; j < days; j++)
+        {
+            file << "День " << (j + 1) << ":" << endl;
+            for (int q = 0; q < pr_schedule[i][j].size(); q++)
+            {
+                file << "  Урок " << (q + 1) << ": " << (pr_schedule[i][j][q].empty() ? "---" : pr_schedule[i][j][q]) << endl;
+            }
+            file << endl;
+        }
+        file << "---------------------------------" << endl;
+    }
+}
+
+vector<vector<vector<string>>> post_all_lessons(vector<vector<pair<string, int>>> &data_v1, vector<vector<string>> &data_v2, vector<vector<vector<string>>> &data_v3, vector<pair<pair<string, pair<int, int>>, vector<string>>> &data_v4, int &classs, int teacher) // разместить все уроки 1 версия
 {
     vector<vector<vector<string>>> schedule(classs);
+    vector<vector<vector<string>>> pr_schedule(classs);
     vector<vector<int>> schedule_data_v1;
     pair<int, int> schedule_data_v2, schedule_data_v3;
     vector<vector<string>> schedule_1v;
@@ -153,11 +285,15 @@ vector<vector<vector<string>>> post_all_lessons(vector<vector<pair<string, int>>
         schedule_data_v3 = schedule_data_3v(data_v1, data_v4, i, stoi(data_v2[i][2]));
         schedule[i] = schedule_v1(schedule_data_v1, schedule_data_v2, schedule_data_v3, stoi(data_v2[i][2]), data_v1[i]);
     }
+    pr_schedule = schedule_v2(schedule, data_v1, data_v2, teacher, classs, data_v4);
+    save_schedule_to_file(pr_schedule, data_v2);
+    return pr_schedule;
 }
 
-vector<vector<vector<string>>> schedule(vector<vector<pair<string, int>>> &data_v1, vector<vector<string>> &data_v2, vector<vector<vector<string>>> &data_v3, vector<pair<pair<string, pair<int, int>>, vector<string>>> &data_v4, int &classs)
+vector<vector<vector<string>>> schedule(vector<vector<pair<string, int>>> &data_v1, vector<vector<string>> &data_v2, vector<vector<vector<string>>> &data_v3, vector<pair<pair<string, pair<int, int>>, vector<string>>> &data_v4, int &classs, int teacher)
 {
-    vector<vector<vector<string>>> schedule_v1 = post_all_lessons(data_v1, data_v2, data_v3, data_v4, classs);
+    vector<vector<vector<string>>> schedule_v1 = post_all_lessons(data_v1, data_v2, data_v3, data_v4, classs, teacher);
+    return schedule_v1;
 }
 
 vector<vector<pair<string, int>>> data_1v(int &classs, ifstream &file1)
@@ -211,10 +347,10 @@ vector<vector<vector<string>>> data_3v(int &classs)
     return data_v3;
 }
 
-vector<pair<pair<string, pair<int, int>>, vector<string>>> data_4v()
+vector<pair<pair<string, pair<int, int>>, vector<string>>> data_4v(int teacher)
 {
-    int kol;
     ifstream file4("4file_project.txt");
+    int kol;
     file4 >> kol;
     vector<pair<pair<string, pair<int, int>>, vector<string>>> data_v4(kol);
     for (int i = 0; i < kol; i++)
@@ -231,8 +367,9 @@ vector<pair<pair<string, pair<int, int>>, vector<string>>> data_4v()
 
 int main()
 {
+    int classs, teacher;
+
     ifstream file1("1file_project.txt");
-    int classs;
     file1 >> classs;
 
     vector<vector<pair<string, int>>> data_v1;
@@ -241,11 +378,12 @@ int main()
     data_v2 = data_2v(classs);
     vector<vector<vector<string>>> data_v3;
     data_v3 = data_3v(classs);
-    vector<pair<pair<string, pair<int, int>>, vector<string>>> data_v4;
-    data_v4 = data_4v();
-    vector<vector<vector<string>>> otv;
-    otv = schedule(data_v1, data_v2, data_v3, data_v4, classs);
-}
 
-// srand(time(0));
-// int x = rand() % (data_v1[i].size() + 1);
+    ifstream file4("4file_project.txt");
+    file4 >> teacher;
+
+    vector<pair<pair<string, pair<int, int>>, vector<string>>> data_v4;
+    data_v4 = data_4v(teacher);
+    vector<vector<vector<string>>> otv;
+    otv = schedule(data_v1, data_v2, data_v3, data_v4, classs, teacher);
+}

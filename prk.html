@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Автоматическое составление расписаний</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .buttons {
+            margin-bottom: 20px;
+        }
+
+        .buttons button {
+            padding: 10px 16px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #content {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>Автоматическое составление расписаний</header>
+
+
+    <div class="buttons">
+        <button onclick="showDescription()">описание</button>
+        <button onclick="showDownload()">скачать</button>
+        <button onclick="showMaterials()">материалы</button>
+    </div>
+
+
+    <div id="content"></div>
+
+
+    <script>
+        const content = document.getElementById('content');
+
+
+        function showDescription() {
+            content.textContent = 'Программа для составления расписания реализует функционал составления расписания в автоматизированном режиме';
+        }
+
+
+        function showDownload() {
+            content.textContent = 'скачать';
+        }
+
+
+        function showMaterials() {
+            content.textContent = 'Новые функциональные возможности, интеграция';
+        }
+    </script>
+</body>
+
+</html>

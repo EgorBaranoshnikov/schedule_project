@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Учебный проект</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f7f7f7;
+      color: #222;
+    }
+
+    header {
+      background: #fff;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: center;
+      position: relative;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    header h1 {
+      color: #ff4d4f;
+      font-size: 18px;
+      margin: 0;
+    }
+
+    header button {
+      position: absolute;
+      right: 24px;
+      top: 12px;
+      background: #ffa726;
+      border: none;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 40px auto;
+      display: flex;
+      gap: 24px;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      flex: 1;
+    }
+
+    .card h2 {
+      margin-top: 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tabs button {
+      padding: 12px 22px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .tabs button.active {
+      background: #ffa726;
+      color: #fff;
+      border-color: #ffa726;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: #888;
+      font-size: 13px;
+    }
+
+    .download-btn {
+      display: block;
+      width: 100%;
+      max-width: 800px;
+
+      margin: 20px auto;
+      padding: 16px 0;
+
+      background-color: #e6fbf2;
+      /* светло-зелёный */
+      color: #28d691;
+      /* зелёный текст */
+
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      text-decoration: none;
+
+      border-radius: 10px;
+      transition: background-color 0.2s ease;
+    }
+
+    .download-btn:hover {
+      background-color: #d6f7ea;
+    }
+
+    .card2 {
+      background: #f3f3f3;
+      border-radius: 12px;
+      padding: 24px;
+      flex: 1;
+    }
+
+    p {
+      margin: 4px 0;
+
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Учебный проект</h1>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Автоматизированное составление расписания</h2>
+
+      <div class="tabs">
+        <button class="tab active" onclick="openTab(0)">описание</button>
+        <button class="tab" onclick="openTab(1)">скачать</button>
+        <button class="tab" onclick="openTab(3)">материалы</button>
+      </div>
+
+      <div class="tab-content active">
+        <p>
+          Автоматическое составление расписаний c учётом заданных данных. Подходит для всех учреждениях данного типа.
+          Система позволяет оптимизировать процесс
+          планирования занятий. Проект работает на реализация алгоритма приоритетов (штрафов) учитывающих:
+        </p>
+        <ul>
+          <li>сложность учебного дня</li>
+          <li>загруженность по урокам</li>
+        </ul>
+        <p>
+          а также:
+        </p>
+        <ul>
+          <li>исключает несколько уроков подряд</li>
+          <li>убирает конфликты у учителей</li>
+          <li>равномерное распределение уроков по неделе</li>
+          <li>делает расписание без окон</li>
+          <li>один учитель на весь предмет у класса</li>
+        </ul>
+        <p>
+          в будущем планируется:
+        </p>
+        <ul>
+          <li>добавление второй сметы</li>
+          <li>добавление второй группы (английский / труды и другие)</li>
+          <li>добавление двойных уроков</li>
+        </ul>
+        <b>
+
+        </b>
+        <p>Сообщить об ошибке: <a href="mailto:egor.baranoshnikov@gmail.com">egor.baranoshnikov@gmail.com</a></p>
+        <b></b>
+      </div>
+
+      <div class="tab-content">
+        <a href="составление_расписатния.zip" download style="text-decoration:none;">
+          <button class="download-btn">
+            Скачать
+          </button>
+        </a>
+        <pre>
+          <b>На данной версии приложение не имеет графического интерфейса!</b>
+          <b>Вам придётся вводить все данные самостоятельно!</b>
+        </pre>
+        <p>Как же работать с приложением?</p>
+        <p>примечание: вы можете ставить любое количество пробелов, табов, перенос строк</p>
+        <p>перед началом извлеките файл</p>
+        <p>Вам нужно заполнить файлы:</p>
+        <ul>
+          <li>1file_project.txt</li>
+          <li>2file_project.txt</li>
+          <li>3file_project.txt</li>
+          <li>4file_project.txt</li>
+        </ul>
+        <p>1. (1file_project.txt)</p>
+        <ul>
+          <li>Первая цифра этого файла должна означать количество классов.</li>
+          <li>Дальше должно идти описание предметов в классе.</li>
+          <li>Первая цифра должна означать количество предметов в этом классе.</li>
+          <li>Потом должны идти парами: название предмета и сколько раз в неделю должет идти этот урок.</li>
+        </ul>
+        <p>пример:</p>
+        <div class="card2" style="max-width:500px;">
+          <p>3</p>
+          <p>4 алгебра 6 геометрия 2 физика 3 химия 2</p>
+          <p>4 алгебра 6 геометрия 2 физика 3 химия 2</p>
+          <p>4 алгебра 6 геометрия 2 физика 3 химия 2</p>
+        </div>
+        <br><br>
+        <p>2. (2file_project.txt)</p>
+        <ul>
+          <li>Во втором файле должно идти описание классов.</li>
+          <li>первое - название класса.</li>
+          <li>второе - фио классного руковадителя (через точки)</li>
+          <li>третие - сколько дней в неделе учатся</li>
+        </ul>
+        <p>пример:</p>
+        <div class="card2" style="max-width:500px;">
+          <p>8А Лебедева.Валерия.Михайловна 6</p>
+          <p>8Б Петрова.Елизавета.Максимовна 6</p>
+          <p>8В Медведев.Дмитрий.Адамович 6</p>
+        </div>
+        <br><br>
+        <p>3. (3file_project.txt)</p>
+        <ul>
+          <li>Ничего не пишите (этот файл нужет будет для следующих версий)</li>
+        </ul>
+        <p>пример:</p>
+        <div class="card2" style="max-width:500px;">
+        </div>
+        <br><br>
+        <p>4. (4file_project.txt)</p>
+        <ul>
+          <li>Этот файл нужен для заполнения учителей и сложности предмета</li>
+          <li>Первая цифра этого файла должна означать количество предметов</li>
+          <li>дальше идёт сам предмет, сколько учителей его ведут и балл сложности этого предмета</li>
+          <li>дальше идёт список учителей этого предмета (через точки)</li>
+        </ul>
+        <p>пример:</p>
+        <div class="card2" style="max-width:500px;">
+          <p>3</p>
+          <p>алгебра 2 8</p>
+          <p>Потапова.Анна.Артемьевна</p>
+          <p>Анисимова.Виктория.Константиновна</p>
+          <br><br>
+          <p>россия.мои.горизонты 1 1</p>
+          <p>Лебедева.Валерия.Михайловна</p>
+          <br><br>
+          <p>физическая.культура 3 1</p>
+          <p>Кудрявцев.Александр.Ярославович</p>
+          <p>Ковалев.Денис.Алексеевич</p>
+          <p>Васильев.Константин.Кириллов</p>
+        </div>
+        <br></br>
+        <p>после заполнения файлов запустите prk.exe</p>
+      </div>
+
+      <div class="tab-content">
+        <p>материалы</p>
+      </div>
+    </div>
+
+    <div class="card" style="max-width:300px;">
+      <h3>Информация о продукте</h3>
+      <p><b>Участник:</b> Бараношников Егор</p>
+      <p><b>Актуальная версия:</b> 1.2</p>
+      <p><b>Отрасль:</b> Школы</p>
+    </div>
+
+  </main>
+
+  <footer>Москва 2026 · Учебный проект</footer>
+
+  <script>
+    function openTab(index) {
+      document.querySelectorAll('.tab').forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+      });
+      document.querySelectorAll('.tab-content').forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+      });
+    }
+  </script>
+
+</body>
+
+</html>
